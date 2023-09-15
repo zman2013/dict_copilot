@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import sqlite3
 import requests
 import datetime
+from xml.etree import ElementTree
 
 app = Flask(__name__)
 DATABASE = 'words.db'
@@ -43,36 +44,33 @@ def index():
 @app.route('/add_word', methods=['get'])
 def add_word():
     word = request.args.get('word')
-    phonetic_symbol, translation = get_translation(word)
-    if not phonetic_symbol:
-        return jsonify({"error": "Failed to fetch translation"}), 400
-    
-    # Save to database
     date = datetime.datetime.now().strftime("%Y-%m-%d")
+    
+    # Get data from the third-party API
+    phonetic_symbol, translations = get_translation(word)
+    translation_text = '; '.join([trans for trans in translations])
+    audio_link = f"http://dict.youdao.com/dictvoice?audio={word}&type=0"
+
+    # Save to the database
     with sqlite3.connect(DATABASE) as con:
         cur = con.cursor()
-        cur.execute("INSERT INTO words (word, date) VALUES (?, ?)", (word, date))
+        cur.execute("INSERT OR REPLACE INTO words (word, phonetic, translation, audio_link, date) VALUES (?, ?, ?, ?, ?)",
+                    (word, phonetic_symbol, translation_text, audio_link, date))
         con.commit()
 
-    pronunciation_url = f"http://dict.youdao.com/dictvoice?audio={word}&type=0"
-    return jsonify({"word": word, "translation": translation, "pronunciation_url": pronunciation_url})
+    return jsonify({"message": "Word added successfully"})
+
 
 @app.route('/get_words', methods=['GET'])
 def get_words():
     date = request.args.get('date', datetime.datetime.now().strftime("%Y-%m-%d"))
+    
     with sqlite3.connect(DATABASE) as con:
         cur = con.cursor()
-        rows = cur.execute("SELECT word FROM words WHERE date=?", (date,)).fetchall()
+        rows = cur.execute("SELECT word, phonetic, translation, audio_link FROM words WHERE date=?", (date,)).fetchall()
 
-    words_list = []
-    for row in rows:
-        word = row[0]
-        phonetic_symbol, translations = get_translation(word) # We modify get_translation to return a list of translations
-        words_list.append({
-            "word": word, 
-            "translations": translations, 
-            "phonetic": phonetic_symbol
-        })
+    words_list = [{"word": row[0], "phonetic": row[1], "translations": row[2].split('; '), "audio_link": row[3]} for row in rows]
+
     return jsonify({"date": date, "words": words_list})
 
 
