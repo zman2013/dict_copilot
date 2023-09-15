@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<body style="background-color: wheat;">
+    <div id="word-list" >
+        <!-- Words will be populated here from the API -->
+    </div>
+</body>
+<script>
+    function playWord(word) {
+            let audio = new Audio(`http://dict.youdao.com/dictvoice?audio=${word}&type=0`);
+            audio.play();
+        }
+
+    utools.onPluginEnter(({code, type, payload, option}) => {
+        console.log('用户进入插件应用', code, type, payload);
+
+        window.fetch('http://localhost:5001/add_word?word='+payload)
+            .then(response => response.json())
+            .then(wordData => {
+            
+                const wordList = document.getElementById('word-list');
+                
+                const wordItem = document.createElement('div');
+                wordItem.className = 'word-item';
+                
+                const wordSpan = document.createElement('span');
+                wordSpan.className = 'word';
+                wordSpan.textContent = `${wordData.word} [${wordData.phonetic}]`;
+                wordItem.appendChild(wordSpan);
+                
+                const playButton = document.createElement('button');
+                playButton.textContent = 'Play';
+                playButton.onclick = () => playWord(wordData.word);
+                wordItem.appendChild(playButton);
+
+                // Handle multiple translations
+                wordData.translations.forEach(translation => {
+                    const translationDiv = document.createElement('div');
+                    translationDiv.className = 'translation';
+                    translationDiv.textContent = translation;
+                    wordItem.appendChild(translationDiv);
+                });
+
+                wordList.appendChild(wordItem);
+                
+            });
+        })
+
+
+</script>
+</html>

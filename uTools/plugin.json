@@ -1,0 +1,23 @@
+{
+	"main": "index.html",
+    "preload": "preload.js",
+	"logo": "logo.png",
+	"features": [
+		{
+		  "code": "translate",
+		  "explain": "翻译一下",
+			"cmds":[ {
+  
+                "type": "over",
+
+                "label": "翻译一下",
+   
+                "exclude": "/xxx/",
+
+                "minLength": 3,
+     
+                "maxLength": 100
+            }]
+		}
+	]
+}
