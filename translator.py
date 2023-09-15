@@ -57,7 +57,10 @@ def add_word():
 
 @app.route('/get_words', methods=['GET'])
 def get_words():
-    date = request.args.get('date', datetime.datetime.now().strftime("%Y-%m-%d"))
+    date = request.args.get('date', get_latest_date())
+    if not date:
+        return jsonify({"message": "Error retrieving words from database."}), 500
+
     try:
     
         with sqlite3.connect(DATABASE) as con:
@@ -71,6 +74,21 @@ def get_words():
         return jsonify({"message": "Error while retrieving words."}), 500   
 
     return jsonify({"date": date, "words": words_list})
+
+def get_latest_date():
+    try:
+        conn = sqlite3.connect(DATABASE)
+        cursor = conn.cursor()
+        
+        # Query to fetch the latest date from the database
+        cursor.execute("SELECT MAX(date) FROM words")
+        date = cursor.fetchone()[0]
+        
+        conn.close()
+        return date
+    except Exception as e:
+        logger.error(f"Error while fetching latest date from database: {e}")
+        return None
 
 
 if __name__ == "__main__":
