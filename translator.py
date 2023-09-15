@@ -7,21 +7,6 @@ from xml.etree import ElementTree
 app = Flask(__name__)
 DATABASE = 'words.db'
 
-def init_db():
-    with sqlite3.connect(DATABASE) as con:
-        cur = con.cursor()
-        # We add columns for phonetic, translation and audio_link
-        cur.execute("""
-            CREATE TABLE IF NOT EXISTS words (
-                word TEXT PRIMARY KEY,
-                phonetic TEXT,
-                translation TEXT,
-                audio_link TEXT,
-                date TEXT
-            )
-        """)
-        con.commit()
-
 def get_translation(word):
     url = f"https://dict.youdao.com/fsearch?q={word}"
     response = requests.get(url)
@@ -75,5 +60,4 @@ def get_words():
 
 
 if __name__ == "__main__":
-    init_db()
     app.run(debug=True, port=5001)
