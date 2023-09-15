@@ -52,7 +52,7 @@ def add_word():
         logger.error(f'Error while adding word {word}. Exception: {e}')
         return jsonify({"message": "Error while adding word."}), 500            
 
-    return jsonify({"message": "Word added successfully"})
+    return jsonify({"message": "Word added successfully", "word": word, "phonetic": phonetic_symbol, "translation": translation_text, "audio_link": audio_link})
 
 
 @app.route('/get_words', methods=['GET'])
