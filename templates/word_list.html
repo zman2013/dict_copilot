@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word List</title>
+    <style>
+        .word-item {
+            margin: 10px 0;
+        }
+        .translation {
+            margin-left: 10px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <button onclick="playAll()">Play All Words</button>
+
+    <div id="word-list">
+        <!-- Words will be populated here from the API -->
+    </div>
+
+    <script>
+        let currentWordIndex = 0;
+        let repeatCount = 0;
+
+        function playWord(word) {
+            let audio = new Audio(`http://dict.youdao.com/dictvoice?audio=${word}&type=0`);
+            audio.play();
+        }
+
+        function playAll() {
+            let words = document.querySelectorAll('.word-item .word');
+            if (words.length === 0) return;
+
+            function playNextWord() {
+                if (repeatCount < 3) {
+                    let word = words[currentWordIndex].textContent.split(' ')[0]; // extract word from "word [phonetic]" format
+                    playWord(word);
+
+                    repeatCount++;
+                    setTimeout(playNextWord, 3000); // 3 seconds interval
+                } else {
+                    repeatCount = 0;
+                    currentWordIndex++;
+
+                    if (currentWordIndex < words.length) {
+                        setTimeout(playNextWord, 3000);
+                    } else {
+                        // reset for next round
+                        currentWordIndex = 0;
+                    }
+                }
+            }
+
+            playNextWord();
+        }
+
+        // Fetch words on page load
+        window.onload = function() {
+            fetch('/get_words').then(response => response.json()).then(data => {
+                const wordList = document.getElementById('word-list');
+                data.words.forEach(wordData => {
+                    const wordItem = document.createElement('div');
+                    wordItem.className = 'word-item';
+                    
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'word';
+                    wordSpan.textContent = `${wordData.word} [${wordData.phonetic}]`;
+                    wordItem.appendChild(wordSpan);
+                    
+                    const playButton = document.createElement('button');
+                    playButton.textContent = 'Play';
+                    playButton.onclick = () => playWord(wordData.word);
+                    wordItem.appendChild(playButton);
+
+                    const translationDiv = document.createElement('div');
+                    translationDiv.className = 'translation';
+                    translationDiv.textContent = wordData.translation;
+                    wordItem.appendChild(translationDiv);
+
+                    wordList.appendChild(wordItem);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
