@@ -75,10 +75,13 @@
                     playButton.onclick = () => playWord(wordData.word);
                     wordItem.appendChild(playButton);
 
-                    const translationDiv = document.createElement('div');
-                    translationDiv.className = 'translation';
-                    translationDiv.textContent = wordData.translation;
-                    wordItem.appendChild(translationDiv);
+                    // Handle multiple translations
+                    wordData.translations.forEach(translation => {
+                        const translationDiv = document.createElement('div');
+                        translationDiv.className = 'translation';
+                        translationDiv.textContent = translation;
+                        wordItem.appendChild(translationDiv);
+                    });
 
                     wordList.appendChild(wordItem);
                 });
