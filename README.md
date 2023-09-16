@@ -40,13 +40,18 @@ python translator.py
 
 ### 查单词
 1. 在 uTools UI 中输入单词会自动匹配该插件
-![Alt text](images/image.png)
+
+<img src="images/image.png" width=200 />
+
 2. 点击空格激活插件
+
 3. 查看单词翻译，并点击按钮播放发音
-![Alt text](images/image-1.png)
+
+<img src="images/image-1.png" width=400/>
 
 ### 复习单词
 1. 在浏览器输入网址: https://xxx/，页面会自动加载最近一天学习的单词列表，并且可以播放全部单词
-![Alt text](images/image-2.png)
+
+<img src="images/image-2.png" width=400/>
 
 
